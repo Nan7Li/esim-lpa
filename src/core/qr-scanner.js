@@ -14,7 +14,7 @@ let animFrameId = null;
  */
 export async function scanFile(file) {
   if (!window.jsQR) throw new Error('QR scanner library not loaded. Please refresh.');
-  if (!file.type.startsWith('image/')) throw new Error('File must be an image.');
+  if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/bmp'].includes(file.type)) throw new Error('File must be an image.');
   if (file.size > 10 * 1024 * 1024) throw new Error('File too large. Maximum 10MB.');
 
   const imageData = await loadImageData(file);
@@ -33,15 +33,29 @@ function loadImageData(file) {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      URL.revokeObjectURL(url);
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      resolve(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height));
+      try {
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+        // Bound canvas allocation independently of compressed file size.
+        if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0 ||
+            width > 8192 || height > 8192 || width * height > 16 * 1024 * 1024) {
+          throw new Error('Invalid image dimensions.');
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Canvas context unavailable.');
+        context.drawImage(img, 0, 0);
+        resolve(context.getImageData(0, 0, width, height));
+      } catch {
+        reject(new Error('Failed to load image.'));
+      } finally {
+        URL.revokeObjectURL(url);
+      }
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image.')); };
-    img.src = url;
+    try { img.src = url; } catch { img.onerror(); }
   });
 }
 

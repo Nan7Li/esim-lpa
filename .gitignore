@@ -338,8 +338,7 @@ config.local.json
 # Tabnine
 .tabnine/
 
-# npm lock file (not needed — CF Pages doesn't build, esbuild version pinned)
-package-lock.json
+# npm lock file is committed for reproducible converter builds.
 
 # =============================================================================
 # Others

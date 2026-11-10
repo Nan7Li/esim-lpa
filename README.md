@@ -1,3 +1,7 @@
+# eSIM → LPA（繁體中文修改版）
+
+本站已改為隱私優先的 QR 圖片轉 LPA 工具。**請先閱讀 [修改版說明與部署方式](README-converter.md)。** 以下保留上游原始文件，部分功能不包含在此版網站內。
+
 <div align="center">
 
 # 📱 eSIM Configuration Parser

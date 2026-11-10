@@ -9,15 +9,28 @@
     "url": "https://github.com/yagami1997/esimswap.git"
   },
   "scripts": {
-    "build": "node build.js",
+    "build": "node build-converter.js",
+    "build:upstream": "node build.js",
+    "test:e2e": "playwright test tests/converter.e2e.spec.js",
     "dev": "node build.js --watch",
     "preview": "npx serve dist -p 8742",
     "test": "node --test tests/*.test.js"
   },
-  "keywords": ["esim", "qr-code", "lpa", "qr-generator", "qr-parser"],
+  "keywords": [
+    "esim",
+    "qr-code",
+    "lpa",
+    "qr-generator",
+    "qr-parser"
+  ],
   "author": "yagami1997",
   "license": "GPL-3.0",
   "devDependencies": {
-    "esbuild": "0.28.0"
+    "@playwright/test": "1.65.0",
+    "esbuild": "0.28.2",
+    "qrcode": "1.5.4"
+  },
+  "dependencies": {
+    "jsqr": "1.4.0"
   }
 }

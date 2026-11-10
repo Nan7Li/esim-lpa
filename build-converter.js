@@ -1,0 +1,12 @@
+import { build } from 'esbuild';
+import { mkdirSync, copyFileSync, rmSync } from 'node:fs';
+rmSync('dist', { recursive: true, force: true });
+mkdirSync('dist', { recursive: true });
+await build({ entryPoints: ['src/converter-app.js'], outfile: 'dist/app.js', bundle: true, minify: true, target: ['es2020'], format: 'iife', legalComments: 'eof' });
+copyFileSync('converter.html', 'dist/index.html');
+copyFileSync('converter.css', 'dist/converter.css');
+copyFileSync('LICENSE', 'dist/LICENSE');
+copyFileSync('node_modules/jsqr/LICENSE', 'dist/THIRD_PARTY_LICENSES.txt');
+copyFileSync('converter-headers', 'dist/_headers');
+copyFileSync('converter.html', 'dist/404.html');
+console.log('Built privacy-focused eSIM LPA converter in dist/');

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eSIM → LPA｜QR Code 轉換工具</title>
+<meta name="description" content="在瀏覽器內將電信商的 eSIM QR Code 圖片讀取為 LPA 啟用字串。不上傳圖片、不儲存啟用碼。">
+<meta name="theme-color" content="#17705b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2317705b'/%3E%3Ctext x='12' y='44' fill='white' font-family='monospace' font-size='38'%3Ee%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/converter.css"><script src="/app.js" defer></script>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="/" aria-label="eSIM LPA 首頁"><span class="brand-mark">e</span> eSIM <span class="brand-light">/ LPA</span></a><span class="local-badge"><span class="dot"></span> 本機處理</span></header>
+<main>
+<section class="intro"><p class="eyebrow">ESIM ACTIVATION TOOL</p><h1>把 QR Code，<br class="mobile-break">轉成可複製的 LPA。</h1><p class="lede">讀取電信商提供的 eSIM 二維碼，取出完整啟用字串。<br>無須註冊，也不需要把你的啟用碼交給伺服器。</p></section>
+<div class="workspace">
+<section class="input-panel" aria-labelledby="input-title"><div class="section-heading"><h2 id="input-title"><span class="step">01</span> 選擇 QR Code 圖片</h2></div>
+<div id="dropzone" class="dropzone"><svg width="42" height="42" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 3H3v8M21 3h8v8M3 21v8h8M29 21v8h-8"/><path d="M9 9h5v5H9zM19 9h4v5h-4zM9 19h5v4H9zM19 19h4v4h-4z"/></svg><p class="drop-title">將圖片拖放到這裡</p><p class="drop-note">或貼上截圖 <kbd>Ctrl / ⌘</kbd> + <kbd>V</kbd></p><button type="button" id="choose-file" class="primary">選擇圖片</button><input id="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden><p class="file-hint">PNG、JPG、WebP、GIF、BMP · 最大 10 MB</p></div>
+<div class="status-row"><span id="status" role="status" aria-live="polite">等待選擇圖片</span><span id="busy" hidden>讀取中…</span></div>
+<details class="manual"><summary>已經有 LPA 文字？直接貼上解析</summary><div class="manual-body"><label for="manual-input">完整 LPA 字串</label><textarea id="manual-input" placeholder="LPA:1$smdp.example.com$MATCHING-ID" rows="3" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea><button type="button" id="parse-text" class="secondary">解析文字</button></div></details>
+</section>
+<section class="output-panel" aria-labelledby="result-title"><div class="section-heading"><h2 id="result-title"><span class="step">02</span> 取得 LPA 啟用字串</h2><button type="button" id="clear" class="text-button">清除所有資料</button></div>
+<div id="empty-state" class="empty-state"><span class="empty-label">LPA:1$…</span><p>你的轉換結果會顯示在這裡</p><small>只讀取 QR Code，不會啟用或下載 eSIM。</small></div>
+<div id="results" hidden><label class="field-label" for="lpa-output">完整 LPA <span class="success-label">已讀取</span></label><textarea id="lpa-output" readonly rows="4" spellcheck="false" aria-label="完整 LPA 結果" autocomplete="off"></textarea><button type="button" id="copy-lpa" class="primary wide">複製完整 LPA</button><dl class="fields"><div><dt>SM-DP+ 伺服器</dt><dd id="smdp-output"></dd></div><div><dt>啟用碼 / Matching ID</dt><dd id="activation-output"></dd></div><div id="optional-row" hidden><dt>其餘原始欄位</dt><dd id="optional-output"></dd></div></dl><p id="optional-note" class="small-note" hidden>額外欄位已原樣保留；可能是 OID、確認碼要求旗標或電信商擴充欄位，不會自動當成確認碼。</p><p class="small-note">已移除字串頭尾空白，其餘內容不變。請保管完整 LPA，它與原始二維碼一樣敏感。</p></div>
+</section>
+</div>
+<section class="help"><div><h3>資料不離開這個分頁</h3><p>圖片解碼與文字解析皆在瀏覽器內完成。不儲存歷史、不使用分析追蹤，也不把啟用碼放進網址。複製後的內容會留在系統剪貼簿，請自行清除。</p></div><div><h3>這不是 eSIM 啟用服務</h3><p>工具只轉換格式，不連線電信商、不驗證方案是否可用，也不會消耗啟用次數。若二維碼是網站連結或專有格式，請向電信商索取 LPA 啟用碼。</p></div></section>
+</main>
+<footer><span>eSIM / LPA · 隱私優先的轉換工具</span><span>基於 <a href="https://github.com/yagami1997/esimswap" target="_blank" rel="noopener noreferrer">esimswap</a> 修改 · <a href="https://github.com/Nan7Li/esim-lpa" target="_blank" rel="noopener noreferrer">原始碼 / GPL-3.0</a> · <a href="/THIRD_PARTY_LICENSES.txt" target="_blank" rel="noopener noreferrer">第三方授權</a></span></footer>
+</body></html>
