@@ -2,6 +2,7 @@
 import jsQR from 'jsqr';
 import { scanFile } from './core/qr-scanner.js';
 import { parseActivation } from './core/lpa-converter.js';
+import { renderActivationQR, composeActivation } from './core/qr-export.js';
 window.jsQR = jsQR;
 const $ = selector => document.querySelector(selector);
 let job = 0;
@@ -42,8 +43,11 @@ const errors = new Map([
 ]);
 async function processFile(file) {
   if (!file) return;
+  selectMode('decode');
   const currentJob = ++job;
   resetResult();
+  $('#file-meta').textContent = file.name || '剪貼簿圖片';
+  $('#file-meta').hidden = false;
   $('#manual-input').value = '';
   busy(true);
   status('正在本機讀取 QR Code…');
@@ -79,9 +83,122 @@ $('#copy-lpa').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(value); status('完整 LPA 已複製；剪貼簿內容請自行保管。', 'success'); }
   catch { $('#lpa-output').focus(); $('#lpa-output').select(); status('瀏覽器未允許複製，請手動複製已選取的 LPA。', 'error'); }
 });
+let generatorJob = 0;
+let generated = null;
+function selectMode(mode) {
+  for (const name of ['decode', 'generate']) {
+    const active = name === mode;
+    $(`#mode-${name}`).setAttribute('aria-selected', String(active));
+    $(`#mode-${name}`).tabIndex = active ? 0 : -1;
+    $(`#${name}-workspace`).hidden = !active;
+  }
+}
+for (const name of ['decode', 'generate']) {
+  const tab = $(`#mode-${name}`);
+  tab.addEventListener('click', () => selectMode(name));
+  tab.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 'decode' : event.key === 'End' ? 'generate' : name === 'decode' ? 'generate' : 'decode';
+    selectMode(next); $(`#mode-${next}`).focus();
+  });
+}
+function generatorStatus(message, type = '') {
+  $('#generator-status').textContent = message;
+  $('#generator-status').className = `generator-status ${type}`;
+}
+function resetQR() {
+  generated = null;
+  $('#qr-result').hidden = true;
+  $('#qr-empty').hidden = false;
+  $('#qr-preview').removeAttribute('src');
+  $('#generator-lpa-output').value = '';
+  $('#download-qr').disabled = true;
+  $('#copy-generated').disabled = true;
+}
+async function updateQR() {
+  const current = ++generatorJob;
+  resetQR();
+  const input = $('#generator-input').value;
+  $('#generator-count').textContent = `${input.length} 字`;
+  if (!input.trim()) { generatorStatus('貼上完整 LPA，即可在右側預覽 QR Code。'); return; }
+  generatorStatus('正在本機產生 QR Code…');
+  try {
+    const result = await renderActivationQR(input);
+    if (current !== generatorJob) return;
+    generated = result;
+    $('#qr-preview').src = result.dataURL;
+    $('#generator-lpa-output').value = result.lpa;
+    $('#qr-empty').hidden = true;
+    $('#qr-result').hidden = false;
+    $('#download-qr').disabled = false;
+    $('#copy-generated').disabled = false;
+    generatorStatus('QR Code 已產生。僅確認格式，未驗證電信方案或啟用狀態。', 'success');
+  } catch (error) {
+    if (current === generatorJob) generatorStatus(/[\u3400-\u9fff]/u.test(error.message) ? error.message : '無法產生 QR Code，請檢查 eSIM 格式或長度。', 'error');
+  }
+}
+$('#generator-input').addEventListener('input', updateQR);
+$('#clear-generator').addEventListener('click', () => { clearGenerator(); $('#generator-input').focus(); });
+function clearGenerator() {
+  ++generatorJob; resetQR();
+  $('#generator-input').value = '';
+  $('#generator-count').textContent = '0 字';
+  for (const selector of ['#builder-smdp', '#builder-code', '#builder-extra']) $(selector).value = '';
+  generatorStatus('貼上完整 LPA，即可在右側預覽 QR Code。');
+}
+$('#paste-lpa').addEventListener('click', async () => {
+  const current = generatorJob;
+  try {
+    const text = await navigator.clipboard.readText();
+    if (current !== generatorJob) return;
+    $('#generator-input').value = text;
+    await updateQR();
+  } catch { if (current === generatorJob) generatorStatus('無法存取剪貼簿，請直接在輸入框貼上 LPA。', 'error'); }
+});
+$('#build-lpa').addEventListener('click', () => {
+  try {
+    $('#generator-input').value = composeActivation({ smdp: $('#builder-smdp').value, matchingId: $('#builder-code').value, optionalFields: $('#builder-extra').value });
+    updateQR();
+  } catch (error) { ++generatorJob; resetQR(); generatorStatus(error.message, 'error'); }
+});
+$('#regenerate-qr').addEventListener('click', () => {
+  const value = $('#lpa-output').value;
+  if (!value) return;
+  selectMode('generate');
+  $('#generator-input').value = value;
+  updateQR();
+});
+$('#download-qr').addEventListener('click', () => {
+  if (!generated) return;
+  const anchor = document.createElement('a');
+  anchor.href = generated.dataURL;
+  anchor.download = 'esim-qr.png';
+  document.body.appendChild(anchor);
+  anchor.click(); anchor.remove();
+});
+$('#copy-generated').addEventListener('click', async () => {
+  const value = generated?.lpa;
+  if (!value) return;
+  try { await navigator.clipboard.writeText(value); if (generated?.lpa === value) generatorStatus('LPA 已複製；請妥善保管剪貼簿內容。', 'success'); }
+  catch {
+    if (generated?.lpa !== value) return;
+    $('#generator-lpa-output').focus(); $('#generator-lpa-output').select();
+    generatorStatus('瀏覽器未允許複製，請手動複製已選取的 LPA。', 'error');
+  }
+});
+for (const [button, output] of [['#copy-smdp', '#smdp-output'], ['#copy-activation', '#activation-output']]) {
+  $(button).addEventListener('click', async () => {
+    const value = $(output).textContent;
+    if (!value) return;
+    try { await navigator.clipboard.writeText(value); if ($(output).textContent === value) status('欄位已複製；請妥善保管剪貼簿內容。', 'success'); }
+    catch { if ($(output).textContent === value) status('瀏覽器未允許複製，請手動選取欄位內容。', 'error'); }
+  });
+}
 function clear() {
-  ++job; busy(false); resetResult();
+  ++job; busy(false); resetResult(); clearGenerator();
   $('#manual-input').value = ''; $('#file-input').value = '';
+  $('#file-meta').textContent = ''; $('#file-meta').hidden = true;
   status('等待選擇圖片');
 }
 $('#clear').addEventListener('click', clear);

@@ -7,6 +7,7 @@ copyFileSync('converter.html', 'dist/index.html');
 copyFileSync('converter.css', 'dist/converter.css');
 copyFileSync('LICENSE', 'dist/LICENSE');
 copyFileSync('node_modules/jsqr/LICENSE', 'dist/THIRD_PARTY_LICENSES.txt');
+copyFileSync('node_modules/qrcode/license', 'dist/QRCODE-LICENSE.txt');
 copyFileSync('converter-headers', 'dist/_headers');
 copyFileSync('converter.html', 'dist/404.html');
 console.log('Built privacy-focused eSIM LPA converter in dist/');

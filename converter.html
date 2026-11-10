@@ -1,29 +1,156 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>eSIM → LPA｜QR Code 轉換工具</title>
-<meta name="description" content="在瀏覽器內將電信商的 eSIM QR Code 圖片讀取為 LPA 啟用字串。不上傳圖片、不儲存啟用碼。">
-<meta name="theme-color" content="#17705b">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2317705b'/%3E%3Ctext x='12' y='44' fill='white' font-family='monospace' font-size='38'%3Ee%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="/converter.css"><script src="/app.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eSIM 轉換工作台｜QR Code ⇄ LPA</title>
+  <meta name="description" content="在瀏覽器內將 eSIM QR Code 轉成 LPA，或將 LPA 產生為 QR Code。不上傳圖片與啟用碼，不儲存輸入，不自動啟用。">
+  <meta name="theme-color" content="#153f37">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23153f37'/%3E%3Cpath d='M20 15h17l9 9v25H20z' fill='none' stroke='%23d6efcf' stroke-width='3'/%3E%3Cpath d='M27 29h12v12H27zM33 29v12M27 35h12' fill='none' stroke='%23d6efcf' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/converter.css">
+  <script src="/app.js" defer></script>
 </head>
 <body>
-<header class="site-header"><a class="brand" href="/" aria-label="eSIM LPA 首頁"><span class="brand-mark">e</span> eSIM <span class="brand-light">/ LPA</span></a><span class="local-badge"><span class="dot"></span> 本機處理</span></header>
-<main>
-<section class="intro"><p class="eyebrow">ESIM ACTIVATION TOOL</p><h1>把 QR Code，<br class="mobile-break">轉成可複製的 LPA。</h1><p class="lede">讀取電信商提供的 eSIM 二維碼，取出完整啟用字串。<br>無須註冊，也不需要把你的啟用碼交給伺服器。</p></section>
-<div class="workspace">
-<section class="input-panel" aria-labelledby="input-title"><div class="section-heading"><h2 id="input-title"><span class="step">01</span> 選擇 QR Code 圖片</h2></div>
-<div id="dropzone" class="dropzone"><svg width="42" height="42" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 3H3v8M21 3h8v8M3 21v8h8M29 21v8h-8"/><path d="M9 9h5v5H9zM19 9h4v5h-4zM9 19h5v4H9zM19 19h4v4h-4z"/></svg><p class="drop-title">將圖片拖放到這裡</p><p class="drop-note">或貼上截圖 <kbd>Ctrl / ⌘</kbd> + <kbd>V</kbd></p><button type="button" id="choose-file" class="primary">選擇圖片</button><input id="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden><p class="file-hint">PNG、JPG、WebP、GIF、BMP · 最大 10 MB</p></div>
-<div class="status-row"><span id="status" role="status" aria-live="polite">等待選擇圖片</span><span id="busy" hidden>讀取中…</span></div>
-<details class="manual"><summary>已經有 LPA 文字？直接貼上解析</summary><div class="manual-body"><label for="manual-input">完整 LPA 字串</label><textarea id="manual-input" placeholder="LPA:1$smdp.example.com$MATCHING-ID" rows="3" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea><button type="button" id="parse-text" class="secondary">解析文字</button></div></details>
-</section>
-<section class="output-panel" aria-labelledby="result-title"><div class="section-heading"><h2 id="result-title"><span class="step">02</span> 取得 LPA 啟用字串</h2><button type="button" id="clear" class="text-button">清除所有資料</button></div>
-<div id="empty-state" class="empty-state"><span class="empty-label">LPA:1$…</span><p>你的轉換結果會顯示在這裡</p><small>只讀取 QR Code，不會啟用或下載 eSIM。</small></div>
-<div id="results" hidden><label class="field-label" for="lpa-output">完整 LPA <span class="success-label">已讀取</span></label><textarea id="lpa-output" readonly rows="4" spellcheck="false" aria-label="完整 LPA 結果" autocomplete="off"></textarea><button type="button" id="copy-lpa" class="primary wide">複製完整 LPA</button><dl class="fields"><div><dt>SM-DP+ 伺服器</dt><dd id="smdp-output"></dd></div><div><dt>啟用碼 / Matching ID</dt><dd id="activation-output"></dd></div><div id="optional-row" hidden><dt>其餘原始欄位</dt><dd id="optional-output"></dd></div></dl><p id="optional-note" class="small-note" hidden>額外欄位已原樣保留；可能是 OID、確認碼要求旗標或電信商擴充欄位，不會自動當成確認碼。</p><p class="small-note">已移除字串頭尾空白，其餘內容不變。請保管完整 LPA，它與原始二維碼一樣敏感。</p></div>
-</section>
-</div>
-<section class="help"><div><h3>資料不離開這個分頁</h3><p>圖片解碼與文字解析皆在瀏覽器內完成。不儲存歷史、不使用分析追蹤，也不把啟用碼放進網址。複製後的內容會留在系統剪貼簿，請自行清除。</p></div><div><h3>這不是 eSIM 啟用服務</h3><p>工具只轉換格式，不連線電信商、不驗證方案是否可用，也不會消耗啟用次數。若二維碼是網站連結或專有格式，請向電信商索取 LPA 啟用碼。</p></div></section>
-</main>
-<footer><span>eSIM / LPA · 隱私優先的轉換工具</span><span>基於 <a href="https://github.com/yagami1997/esimswap" target="_blank" rel="noopener noreferrer">esimswap</a> 修改 · <a href="https://github.com/Nan7Li/esim-lpa" target="_blank" rel="noopener noreferrer">原始碼 / GPL-3.0</a> · <a href="/THIRD_PARTY_LICENSES.txt" target="_blank" rel="noopener noreferrer">第三方授權</a></span></footer>
-</body></html>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="eSIM LPA 首頁">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 4h12l5 5v19H8z"/><path d="M12 13h9v9h-9zM16.5 13v9M12 17.5h9"/></svg></span>
+      <span>eSIM<span class="brand-divider">/</span><span class="brand-light">LPA</span></span>
+    </a>
+    <span class="local-badge"><span class="dot" aria-hidden="true"></span> 本機處理<span class="badge-detail"> · 不儲存資料</span></span>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">QR CODE <span aria-hidden="true">⇄</span> LPA</p>
+        <h1 id="page-title">eSIM 轉換工作台<span class="title-dot">。</span></h1>
+        <p class="lede">讀取二維碼，取出啟用字串；貼上 LPA，重新產生 QR Code。</p>
+      </div>
+      <div class="privacy-note">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4.5 6v5.7c0 4.2 3.4 7.5 7.5 9.3 4.1-1.8 7.5-5.1 7.5-9.3V6z"/><path d="m8.5 11.5 2.3 2.3 4.7-5"/></svg>
+        <p><strong>啟用資料，留在你的掌握中。</strong><span>轉換在瀏覽器內完成，不上傳圖片或 LPA。</span></p>
+      </div>
+    </section>
+
+    <div class="workbench">
+      <div class="workbench-toolbar">
+        <div class="mode-tabs" role="tablist" aria-label="轉換方向">
+          <button type="button" id="mode-decode" role="tab" aria-selected="true" aria-controls="decode-workspace" tabindex="0">QR Code → LPA</button>
+          <button type="button" id="mode-generate" role="tab" aria-selected="false" aria-controls="generate-workspace" tabindex="-1">LPA → QR Code</button>
+        </div>
+        <span class="toolbar-note"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M6 9V6a4 4 0 0 1 8 0v3M4 9h12v8H4z"/><path d="M10 12v2"/></svg> 不連線電信商 · 不自動啟用</span>
+      </div>
+
+      <div id="decode-workspace" class="workspace" role="tabpanel" aria-labelledby="mode-decode">
+        <section class="input-panel" aria-labelledby="input-title">
+          <div class="section-heading">
+            <div><p class="panel-kicker">輸入 / INPUT</p><h2 id="input-title"><span class="step">01</span> 放入你的 QR Code</h2></div>
+            <span class="format-tag">圖片</span>
+          </div>
+          <div id="dropzone" class="dropzone">
+            <svg class="scan-icon" width="52" height="52" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M16 5H6v10M32 5h10v10M6 33v10h10M42 33v10H32"/><path d="M14 14h7v7h-7zM28 14h6v7h-6zM14 28h7v6h-7zM28 28h6v6h-6z"/><path class="scan-line" d="M3 25h42"/></svg>
+            <p class="drop-title">將 QR Code 圖片拖到這裡</p>
+            <p class="drop-note">也可以貼上截圖 <kbd>Ctrl / ⌘</kbd> + <kbd>V</kbd></p>
+            <button type="button" id="choose-file" class="primary"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 13V3m-4 4 4-4 4 4M4 12v5h12v-5"/></svg>選擇圖片</button>
+            <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden>
+            <p class="file-hint">PNG、JPG、WebP、GIF、BMP · 最大 10 MB</p>
+          </div>
+          <p id="file-meta" class="file-meta" hidden></p>
+          <div class="status-row"><span id="status" role="status" aria-live="polite">等待選擇圖片</span><span id="busy" class="busy" hidden><span class="spinner" aria-hidden="true"></span>讀取中…</span></div>
+          <details class="manual disclosure">
+            <summary>已經有 LPA 文字？直接貼上解析<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
+            <div class="manual-body">
+              <label for="manual-input">完整 LPA 字串</label>
+              <textarea id="manual-input" placeholder="LPA:1$smdp.example.com$MATCHING-ID" rows="3" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+              <button type="button" id="parse-text" class="secondary">解析文字</button>
+            </div>
+          </details>
+          <p class="input-tip"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 9v5m0-8v1"/></svg>小提示：裁切至完整二維碼，保留四周白邊，更容易讀取。</p>
+        </section>
+
+        <section class="output-panel" aria-labelledby="result-title">
+          <div class="section-heading">
+            <div><p class="panel-kicker">輸出 / OUTPUT</p><h2 id="result-title"><span class="step">02</span> 取得 LPA 啟用字串</h2></div>
+            <button type="button" id="clear" class="text-button">清除所有資料</button>
+          </div>
+          <div id="empty-state" class="empty-state">
+            <div class="empty-flow" aria-hidden="true">
+              <svg class="empty-qr-icon" viewBox="0 0 52 52" fill="none"><path d="M17 5H5v12M35 5h12v12M5 35v12h12M47 35v12H35"/><path d="M14 14h9v9h-9zM31 14h7v9h-7zM14 31h9v7h-9zM31 31h7v7h-7z"/></svg>
+              <svg class="flow-arrow" viewBox="0 0 36 16" fill="none"><path d="M1 8h32m-6-6 6 6-6 6"/></svg>
+              <span class="empty-label">LPA:1$<span>…</span></span>
+            </div>
+            <h3>讓啟用資料，變成可複製的文字。</h3>
+            <p>加入電信商提供的 eSIM QR Code，<br>完整 LPA 與拆解後的欄位就會出現在這裡。</p>
+            <div class="empty-capabilities"><span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg>複製完整字串</span><span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg>查看原始欄位</span></div>
+            <small>只轉換格式，不會啟用或下載 eSIM。</small>
+          </div>
+          <div id="results" hidden>
+            <div class="result-heading"><label class="field-label" for="lpa-output">完整 LPA</label><span class="success-label"><span class="dot" aria-hidden="true"></span> 已讀取</span></div>
+            <textarea id="lpa-output" class="result-code" readonly rows="3" spellcheck="false" aria-label="完整 LPA 結果" autocomplete="off"></textarea>
+            <div class="result-actions"><button type="button" id="copy-lpa" class="primary"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 7h10v10H7zM13 4V2H2v11h2"/></svg>複製完整 LPA</button><button type="button" id="regenerate-qr" class="secondary">轉成 QR Code</button></div>
+            <div class="detail-heading"><span>欄位明細</span><span>保留原始內容</span></div>
+            <dl class="fields">
+              <div><dt>SM-DP+ 伺服器</dt><dd id="smdp-output"></dd><button type="button" id="copy-smdp" class="field-copy" aria-label="複製 SM-DP+ 伺服器" title="複製 SM-DP+ 伺服器"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 7h10v10H7zM13 4V2H2v11h2"/></svg></button></div>
+              <div><dt>啟用碼 / Matching ID</dt><dd id="activation-output"></dd><button type="button" id="copy-activation" class="field-copy" aria-label="複製啟用碼" title="複製啟用碼"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 7h10v10H7zM13 4V2H2v11h2"/></svg></button></div>
+              <div id="optional-row" hidden><dt>其餘原始欄位</dt><dd id="optional-output"></dd></div>
+            </dl>
+            <p id="optional-note" class="small-note" hidden>額外欄位已原樣保留；可能是 OID、確認碼要求旗標或電信商擴充欄位，不會自動當成確認碼。</p>
+            <p class="small-note result-note">已移除字串頭尾空白，其餘內容不變。這是格式解析結果，不代表啟用碼有效。</p>
+          </div>
+        </section>
+      </div>
+
+      <div id="generate-workspace" class="workspace generator-workspace" role="tabpanel" aria-labelledby="mode-generate" hidden>
+        <section class="input-panel" aria-labelledby="generator-title">
+          <div class="section-heading"><div><p class="panel-kicker">輸入 / INPUT</p><h2 id="generator-title"><span class="step">01</span> 貼上 LPA 啟用字串</h2></div><span class="format-tag">文字</span></div>
+          <div class="generator-input-heading"><label for="generator-input">完整 LPA 字串</label><span id="generator-count" class="character-count">0 字元</span></div>
+          <textarea id="generator-input" class="generator-input" placeholder="LPA:1$smdp.example.com$MATCHING-ID" rows="5" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-describedby="generator-input-hint"></textarea>
+          <p id="generator-input-hint" class="field-hint">以 <code>LPA:1$</code> 開頭。輸入後即時產生，大小寫與額外欄位會原樣保留。</p>
+          <div class="input-actions"><button type="button" id="paste-lpa" class="primary"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 4H4v14h12V4h-3M7 2h6v4H7zM7 10h6m-6 4h4"/></svg>貼上 LPA</button><button type="button" id="clear-generator" class="text-button">清除輸入</button></div>
+          <div id="generator-status" class="generator-status" role="status" aria-live="polite">等待輸入 LPA 啟用字串</div>
+          <details id="generator-builder" class="disclosure builder">
+            <summary>只有伺服器與啟用碼？用欄位組合<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
+            <div class="builder-body">
+              <p class="field-hint">依照電信商提供的原始資料填寫，不會補齊或猜測欄位。</p>
+              <label for="builder-smdp">SM-DP+ 伺服器</label>
+              <input id="builder-smdp" type="text" placeholder="smdp.example.com" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">
+              <label for="builder-code">啟用碼 / Matching ID</label>
+              <input id="builder-code" type="text" placeholder="MATCHING-ID" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">
+              <label for="builder-extra">額外原始欄位（選填）</label>
+              <input id="builder-extra" type="text" placeholder="例如：1.3.6.1.4.1$1" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-describedby="builder-extra-hint">
+              <p id="builder-extra-hint" class="field-hint">填入啟用碼後的原始內容，多個欄位以 <code>$</code> 分隔；不需加開頭的 <code>$</code>。不確定時請留白。</p>
+              <button type="button" id="build-lpa" class="secondary">組合 LPA</button>
+            </div>
+          </details>
+        </section>
+
+        <section class="output-panel qr-panel" aria-labelledby="qr-title">
+          <div class="section-heading"><div><p class="panel-kicker">輸出 / OUTPUT</p><h2 id="qr-title"><span class="step">02</span> 取得你的 QR Code</h2></div><span class="format-tag">PNG</span></div>
+          <div id="qr-empty" class="empty-state qr-empty">
+            <svg class="qr-placeholder" viewBox="0 0 112 112" fill="none" aria-hidden="true"><path class="placeholder-corners" d="M28 5H5v23M84 5h23v23M5 84v23h23M107 84v23H84"/><path d="M23 23h24v24H23zM65 23h24v24H65zM23 65h24v24H23z"/><path class="placeholder-dots" d="M31 31h8v8h-8zM73 31h8v8h-8zM31 73h8v8h-8z"/><path class="placeholder-plus" d="M77 63v28M63 77h28"/></svg>
+            <h3>從一行文字，回到一張二維碼。</h3>
+            <p>貼上完整 LPA 或使用欄位組合，<br>預覽會在這裡顯示，準備好即可下載。</p>
+            <small>只產生 QR Code，不檢查方案或啟用碼是否可用。</small>
+          </div>
+          <div id="qr-result" class="qr-result" hidden>
+            <div class="preview-heading"><span class="success-label"><span class="dot" aria-hidden="true"></span> QR Code 預覽</span><span>原始 LPA · 無損轉換</span></div>
+            <div class="qr-preview-surface"><div class="qr-frame"><img id="qr-preview" alt="由目前 LPA 啟用字串產生的 eSIM QR Code"></div><p>掃描或下載前，請確認啟用資料來源可信。</p></div>
+            <div class="result-actions"><button type="button" id="download-qr" class="primary"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v11m-4-4 4 4 4-4M3 13v5h14v-5"/></svg>下載 PNG</button><button type="button" id="copy-generated" class="secondary">複製此 LPA</button></div>
+            <label class="field-label generated-label" for="generator-lpa-output">此 QR Code 的完整 LPA</label>
+            <textarea id="generator-lpa-output" class="result-code" readonly rows="3" spellcheck="false" autocomplete="off"></textarea>
+            <p class="small-note">圖片與文字包含相同的啟用資料，請勿公開分享。</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <aside class="sensitive-notice" aria-label="啟用資料安全提醒"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10V7a4 4 0 1 1 8 0v3M5 10h14v11H5zM12 14v3"/></svg><p><strong>QR Code 與 LPA 一樣敏感。</strong>兩者都可能用來安裝你的 eSIM；請像密碼一樣保管，只在可信任的裝置使用。</p></aside>
+    <section class="help" aria-label="使用與隱私說明">
+      <div><h3>只在這個分頁處理</h3><p>圖片解碼、文字解析與 QR Code 產生皆在瀏覽器內完成。不儲存輸入或歷史紀錄、不使用分析追蹤，也不把啟用碼放進網址。複製後的系統剪貼簿與下載的圖片，請自行妥善保管。</p></div>
+      <div><h3>轉換格式，不代替電信商驗證</h3><p>工具不連線電信商、不驗證方案是否可用，也不會自動啟用或消耗啟用次數。若二維碼是網站連結或專有格式，請向電信商索取 LPA 啟用碼。</p></div>
+    </section>
+  </main>
+
+  <footer><span>eSIM / LPA <span class="footer-separator">—</span> 你的資料，你來掌握。</span><span>基於 <a href="https://github.com/yagami1997/esimswap" target="_blank" rel="noopener noreferrer">esimswap</a> 修改 · <a href="https://github.com/Nan7Li/esim-lpa" target="_blank" rel="noopener noreferrer">原始碼 / GPL-3.0</a> · <a href="/THIRD_PARTY_LICENSES.txt" target="_blank" rel="noopener noreferrer">第三方授權</a></span></footer>
+</body>
+</html>

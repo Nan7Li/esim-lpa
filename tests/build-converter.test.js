@@ -23,6 +23,14 @@ test('production build ships the QR decoder license alongside the app', t => {
   assert.match(readFileSync(join(fixture, 'dist/THIRD_PARTY_LICENSES.txt'), 'utf8'), /Apache License/);
 });
 
+test('production build ships the exact installed QR encoder license separately without replacing jsQR notice', t => {
+  const fixture = buildFixture(t);
+  execFileSync(process.execPath, ['build-converter.js'], { cwd: fixture });
+  assert.equal(readFileSync(join(fixture, 'dist/QRCODE-LICENSE.txt'), 'utf8'), readFileSync(join(fixture, 'node_modules/qrcode/license'), 'utf8'));
+  assert.match(readFileSync(join(fixture, 'dist/QRCODE-LICENSE.txt'), 'utf8'), /MIT License|MIT/);
+  assert.equal(readFileSync(join(fixture, 'dist/THIRD_PARTY_LICENSES.txt'), 'utf8'), readFileSync(join(fixture, 'node_modules/jsqr/LICENSE'), 'utf8'));
+});
+
 test('converter build removes stale upstream redirects and security entry pages', t => {
   const fixture = buildFixture(t);
   mkdirSync(join(fixture, 'dist/security'), { recursive: true });

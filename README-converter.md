@@ -1,4 +1,4 @@
-# eSIM → LPA｜繁體中文・隱私優先
+# eSIM ⇄ LPA｜繁體中文・隱私優先
 
 此分支是基於 [yagami1997/esimswap](https://github.com/yagami1997/esimswap) 修改的圖片轉 LPA 工具；保留 GPL-3.0 授權。
 
@@ -6,7 +6,10 @@
 
 ## 功能與隱私
 
-- 選擇、拖放或貼上 eSIM QR Code 圖片，複製完整 LPA。
+- 選擇、拖放或貼上 eSIM QR Code 圖片，複製完整 LPA；可分別複製 SM-DP+ 與 Matching ID。
+- 反向貼上 LPA，立即產生 QR Code 預覽並下載 PNG；下載檔名不包含啟用碼。
+- 可由 SM-DP+、Matching ID 及額外原始欄位組合 LPA。額外欄位不會被誤認為確認碼。
+- 解碼結果可直接切換至 QR Code 產生模式，完整字串與大小寫均保持不變。
 - 所有圖片在瀏覽器內解碼，不上傳、不保存歷史、不把啟用碼放進網址。
 - 使用獨立解析器，保留 Matching ID 大小寫與全部額外欄位。不猜測確認碼，不自動修復識別碼。
 - 無第三方 CDN、字型或分析服務；jsQR 固定版本並打包為同源靜態資源。
@@ -41,10 +44,10 @@ npx wrangler pages deploy dist --project-name esim-lpa --branch main
 
 ## 上游差異
 
-使用 `build-converter.js`、`converter.html`、`converter.css`、`src/converter-app.js`、`src/core/lpa-converter.js` 建置。保留並使用上游 `src/core/qr-scanner.js` 圖片解碼功能。
+使用 `build-converter.js`、`converter.html`、`converter.css`、`src/converter-app.js`、`src/core/lpa-converter.js`、`src/core/qr-export.js` 建置。保留並使用上游 `src/core/qr-scanner.js` 圖片解碼功能。
 
 原專案的 legacy parser、history、deep-link 仍保留於原始碼與上游測試中，但不包含在此網站建置。原專案功能可用 `npm run build:upstream` 另行建置（需提供上游要求的環境變數）。
 
 ## 授權
 
-GPL-3.0，見 `LICENSE`。此修改版由 Nan7Li 維護；上游作者 yagami1997。jsQR 的 Apache-2.0 授權文件隨網站部署於 `THIRD_PARTY_LICENSES.txt`。
+GPL-3.0，見 `LICENSE`。此修改版由 Nan7Li 維護；上游作者 yagami1997。jsQR 的 Apache-2.0 授權文件隨網站部署於 `THIRD_PARTY_LICENSES.txt`；qrcode 的 MIT 授權文件隨網站部署於 `QRCODE-LICENSE.txt`。
